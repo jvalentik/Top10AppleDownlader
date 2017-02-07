@@ -2,12 +2,16 @@ package org.jvk.top10downlader;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.MainThread;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +21,9 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
     private static final String APPLE_RSS = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=10/xml";
-    private TextView xmlTextView;
+    private Button btnParse;
+    private ListView listMain;
+    private String fileContents;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +31,20 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        xmlTextView = (TextView) findViewById(R.id.xmlTextView);
+        btnParse = (Button) findViewById(R.id.btnParse);
+        btnParse.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO: Add parse activation code
+                ParseApplications parseApplications = new ParseApplications(fileContents);
+                parseApplications.process();
+                ArrayAdapter<Application> arrayAdapter = new ArrayAdapter<Application>(
+                        MainThread.this, R.layout.list_item, parseApplications.getApplications());
+                listMain.setAdapter(arrayAdapter);
+
+            }
+        });
+        listMain = (ListView) findViewById(R.id.xmlList);
         DownloadData downloadData = new DownloadData();
         downloadData.execute(APPLE_RSS);
     }
@@ -54,7 +73,6 @@ public class MainActivity extends AppCompatActivity {
 
     private class DownloadData extends AsyncTask<String, Void, String> {
         private static final String TAG = "DownloadData";
-        private String fileContents;
 
         @Override
         protected String doInBackground(String... params) {
@@ -68,8 +86,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            Log.d(TAG, "Result was: " + result);
-            xmlTextView.setText(fileContents);
         }
 
         private String downloadXMLFile(String urlPath) {
