@@ -2,13 +2,11 @@ package org.jvk.top10downlader;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.MainThread;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -21,7 +19,6 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
     private static final String APPLE_RSS = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=10/xml";
-    private Button btnParse;
     private ListView listMain;
     private String fileContents;
 
@@ -31,18 +28,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        btnParse = (Button) findViewById(R.id.btnParse);
-        btnParse.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        Button btnParse = (Button) findViewById(R.id.btnParse);
+        btnParse.setOnClickListener(view -> {
                 // TODO: Add parse activation code
                 ParseApplications parseApplications = new ParseApplications(fileContents);
                 parseApplications.process();
-                ArrayAdapter<Application> arrayAdapter = new ArrayAdapter<Application>(
-                        MainThread.this, R.layout.list_item, parseApplications.getApplications());
+                ArrayAdapter<Application> arrayAdapter = new ArrayAdapter<>(
+                        MainActivity.this, R.layout.list_item, parseApplications.getApplications());
                 listMain.setAdapter(arrayAdapter);
-
-            }
         });
         listMain = (ListView) findViewById(R.id.xmlList);
         DownloadData downloadData = new DownloadData();
